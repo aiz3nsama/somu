@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Somu Simulator</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #ff69b4;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      background: rgba(0,0,0,0.4);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      width: 90%;
+      max-width: 350px;
+      height: 70vh;
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: background-image 0.6s ease-in-out;
+    }
+
+    h1, h2 {
+      font-size: 1.5rem;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: #ff0000;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    input {
+      margin-top: 20px;
+      padding: 12px;
+      width: 100%;
+      border-radius: 12px;
+      border: none;
+      font-size: 16px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen 1 -->
+  <div class="container" id="screen1">
+    <h1>Welcome to "Somu Simulator"</h1>
+    <button onclick="goToScreen2()">Continue</button>
+  </div>
+
+  <!-- Screen 2 -->
+  <div class="container hidden" id="screen2" style="background-image: url('ask.jpg');">
+    <h2>Ask Somu a Question</h2>
+    <input type="text" id="question" placeholder="Type your question...">
+    <button onclick="askSomu()">Submit</button>
+    <p id="response"></p>
+  </div>
+
+  <script>
+    function goToScreen2() {
+      document.getElementById('screen1').classList.add('hidden');
+      document.getElementById('screen2').classList.remove('hidden');
+    }
+
+    function askSomu() {
+      const response = document.getElementById('response');
+      const screen2 = document.getElementById('screen2');
+
+      // Thinking state
+      screen2.style.backgroundImage = "url('thinking.jpg')";
+      response.innerText = "Somu is thinking...";
+
+      setTimeout(() => {
+        // Final state
+        screen2.style.backgroundImage = "url('final.jpg')";
+        response.innerText = "Hmmm... I'm too independent bro.";
+      }, 2000);
+    }
+  </script>
+
+</body>
+</html>
