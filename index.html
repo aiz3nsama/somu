@@ -1,105 +1,677 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Somu Simulator</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Letters 💌</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Caveat:wght@500;600;700&family=Quicksand:wght@400;500;600&display=swap');
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #ff69b4;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+:root{
+  --ink:#5b3a45;
+  --ink-soft:#7a5563;
+  --cream:#fff6f1;
+  --pink:#ff89a0;
+  --pink-deep:#e1607b;
+  --peach:#ffd9b3;
+  --mint:#bfeae0;
+  --scrim-top: rgba(60,20,35,.35);
+  --scrim-bot: rgba(45,15,28,.72);
+}
 
-    .container {
-      text-align: center;
-      background: rgba(0,0,0,0.4);
-      padding: 20px;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      width: 90%;
-      max-width: 350px;
-      height: 70vh;
-      background-size: cover;
-      background-position: center;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      transition: background-image 0.6s ease-in-out;
-    }
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  min-height:100vh;
+  font-family:'Quicksand', sans-serif;
+  color:var(--ink);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  overflow-x:hidden;
+}
 
-    h1, h2 {
-      font-size: 1.5rem;
-    }
+/* ---------- BACKGROUND PHOTO LAYER ---------- */
+#bg-layer{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  background-size:cover;
+  background-position:top center;
+  transition:background-image .6s ease;
+}
+#bg-layer.no-photo{
+  background-image:
+    radial-gradient(circle at 25% 15%, rgba(255,217,179,.55), transparent 45%),
+    radial-gradient(circle at 80% 85%, rgba(191,234,224,.35), transparent 50%),
+    linear-gradient(135deg, #ffb6c8 0%, #ff8fa3 35%, #e1607b 70%, #b8455f 100%);
+}
+#bg-layer::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to bottom, var(--scrim-top) 0%, rgba(40,15,25,.2) 35%, var(--scrim-bot) 100%);
+}
 
-    button {
-      margin-top: 20px;
-      padding: 12px;
-      border: none;
-      border-radius: 12px;
-      background: #ff0000;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
+.no-photo-hint{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.6rem;
+  pointer-events:none;
+  text-align:center;
+}
+.no-photo-hint .big-heart{
+  font-size:3rem;
+  animation:beat 1.6s ease-in-out infinite;
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.25));
+}
+.no-photo-hint span.label{
+  font-family:'Quicksand', sans-serif;
+  font-weight:600;
+  letter-spacing:.04em;
+  color:rgba(255,246,241,.85);
+  background:rgba(0,0,0,.18);
+  padding:.5rem 1.1rem;
+  border-radius:999px;
+  font-size:.85rem;
+}
+#bg-layer.no-photo ~ .no-photo-hint{display:flex;}
 
-    input {
-      margin-top: 20px;
-      padding: 12px;
-      width: 100%;
-      border-radius: 12px;
-      border: none;
-      font-size: 16px;
-    }
+/* ---------- FLOATING HEARTS ---------- */
+#hearts-bg{
+  position:fixed;
+  inset:0;
+  z-index:1;
+  overflow:hidden;
+  pointer-events:none;
+}
+.heart-particle{
+  position:absolute;
+  bottom:-10%;
+  font-size:1.2rem;
+  opacity:.85;
+  will-change:transform, opacity;
+  animation-name:floatUp;
+  animation-timing-function:ease-in;
+  animation-fill-mode:forwards;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));
+}
+@keyframes floatUp{
+  0%{ transform:translateY(0) translateX(0) rotate(0deg); opacity:0; }
+  10%{ opacity:.9; }
+  100%{ transform:translateY(-115vh) translateX(var(--drift,20px)) rotate(25deg); opacity:0; }
+}
 
-    .hidden {
-      display: none;
-    }
-  </style>
+@keyframes beat{
+  0%,100%{ transform:scale(1); }
+  50%{ transform:scale(1.12); }
+}
+
+/* ---------- STAGE / LETTER ---------- */
+.stage{
+  position:relative;
+  z-index:3;
+  width:100%;
+  max-width:600px;
+  margin:6vh 1.25rem;
+}
+
+.letter-wrap{
+  position:relative;
+  animation:dropIn .8s cubic-bezier(.2,.9,.25,1.1) both;
+}
+@keyframes dropIn{
+  from{ opacity:0; transform:translateY(-24px) rotate(-3deg) scale(.96); }
+  to{ opacity:1; transform:translateY(0) rotate(-1deg) scale(1); }
+}
+
+.letter{
+  background:rgba(255,246,241,.7);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border-radius:22px;
+  padding:2.8rem 2.4rem 2.2rem;
+  box-shadow:
+    0 25px 50px -18px rgba(60,20,35,.55),
+    0 0 0 3px rgba(255,255,255,.35) inset;
+  position:relative;
+  animation:sway 7s ease-in-out infinite alternate;
+  transform-origin:center 110%;
+}
+.letter-wrap:hover .letter{ animation-play-state:paused; }
+@keyframes sway{
+  from{ transform:rotate(-1.1deg); }
+  to{ transform:rotate(1.1deg); }
+}
+
+/* washi tape */
+.tape{
+  position:absolute;
+  width:88px;
+  height:30px;
+  opacity:.9;
+  z-index:4;
+  box-shadow:0 3px 6px rgba(0,0,0,.15);
+}
+.tape.left{
+  top:-14px; left:22px;
+  background:repeating-linear-gradient(45deg, var(--peach), var(--peach) 8px, #fff0dc 8px, #fff0dc 16px);
+  transform:rotate(-8deg);
+}
+.tape.right{
+  top:-12px; right:18px;
+  background:repeating-linear-gradient(45deg, var(--mint), var(--mint) 8px, #eafaf5 8px, #eafaf5 16px);
+  transform:rotate(7deg);
+}
+
+/* heart seal */
+.seal{
+  position:absolute;
+  top:-22px;
+  left:50%;
+  transform:translateX(-50%);
+  width:46px;
+  height:46px;
+  z-index:5;
+  animation:beat 1.8s ease-in-out infinite;
+  filter:drop-shadow(0 6px 8px rgba(60,20,35,.35));
+}
+.seal svg{ width:100%; height:100%; }
+.seal-initials{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding-top:4px;
+  font-family:'Baloo 2', sans-serif;
+  font-weight:600;
+  font-size:.62rem;
+  color:#fff;
+  letter-spacing:.02em;
+}
+
+.eyebrow{
+  font-family:'Quicksand', sans-serif;
+  font-weight:600;
+  font-size:.78rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--pink-deep);
+  text-align:center;
+  margin:.6rem 0 .3rem;
+}
+
+.dateline{
+  text-align:center;
+  font-family:'Quicksand', sans-serif;
+  font-weight:500;
+  font-size:.85rem;
+  color:var(--ink-soft);
+  margin-bottom:1.1rem;
+}
+
+h1{
+  font-family:'Baloo 2', sans-serif;
+  font-weight:700;
+  font-size:1.85rem;
+  line-height:1.2;
+  color:var(--pink-deep);
+  text-align:center;
+  margin-bottom:.4rem;
+}
+.squiggle{
+  display:block;
+  width:110px;
+  height:14px;
+  margin:0 auto 1.6rem;
+}
+
+.body-copy p{
+  font-family:'Caveat', cursive;
+  font-weight:500;
+  font-size:1.55rem;
+  line-height:1.5;
+  color:var(--ink);
+  margin-bottom:.7rem;
+  opacity:0;
+  transform:translateY(8px);
+  animation:paraIn .6s ease forwards;
+}
+@keyframes paraIn{ to{ opacity:1; transform:translateY(0); } }
+
+.closing{
+  margin-top:1.3rem;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:1rem;
+}
+.closing-text{
+  font-family:'Caveat', cursive;
+  font-size:1.3rem;
+  color:var(--ink-soft);
+}
+.signature{
+  font-family:'Caveat', cursive;
+  font-weight:700;
+  font-size:2rem;
+  color:var(--pink-deep);
+}
+
+.counter{
+  text-align:center;
+  margin-top:.7rem;
+  font-family:'Quicksand', sans-serif;
+  font-weight:500;
+  font-size:.82rem;
+  color:rgba(255,246,241,.85);
+  letter-spacing:.03em;
+}
+
+@media (max-width:480px){
+  .letter{ padding:2.3rem 1.5rem 1.9rem; }
+  h1{ font-size:1.5rem; }
+  .body-copy p{ font-size:1.35rem; }
+  .tape{ width:70px; height:24px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .letter, .letter-wrap, .seal, .heart-particle{ animation:none !important; }
+}
+</style>
 </head>
 <body>
 
-  <!-- Screen 1 -->
-  <div class="container" id="screen1">
-    <h1>Welcome to Somu Simulator</h1>
-    <button onclick="goToScreen2()">Continue</button>
+<div id="bg-layer" class="no-photo"></div>
+<div id="hearts-bg"></div>
+<div class="no-photo-hint">
+  <span class="big-heart">💗</span>
+  <span class="label">add your photo — see instructions in the code</span>
+</div>
+
+<div class="stage">
+  <div class="letter-wrap">
+    <div class="tape left"></div>
+    <div class="tape right"></div>
+    <div class="letter" id="letter">
+      <div class="seal">
+        <svg viewBox="0 0 32 29" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#e1607b" d="M16 29 C 6 21, 0 14, 0 8.5 C 0 3, 4 0, 8.5 0 C 12 0, 15 2.5, 16 5.5 C 17 2.5, 20 0, 23.5 0 C 28 0, 32 3, 32 8.5 C 32 14, 26 21, 16 29 Z"/>
+        </svg>
+        <div class="seal-initials" id="sealInitials">A+B</div>
+      </div>
+      <p class="eyebrow" id="eyebrow">✨ a little love letter ✨</p>
+      <p class="dateline" id="dateline">—</p>
+      <h1 id="title">—</h1>
+      <svg class="squiggle" viewBox="0 0 110 14" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 8 Q 15 -2, 28 8 T 54 8 T 80 8 T 108 8" stroke="#ffd9b3" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="body-copy" id="body"></div>
+      <div class="closing">
+        <span class="closing-text" id="closing">yours, always,</span>
+        <span class="signature" id="signature">—</span>
+      </div>
+    </div>
   </div>
 
-  <!-- Screen 2 -->
-  <div class="container hidden" id="screen2" style="background-image: url('ask.jpg');">
-    <h2>say something to somu</h2>
-    <input type="text" id="question" placeholder="pyar se boliyo">
-    <button onclick="askSomu()">Submit</button>
-    <p id="response"></p>
-  </div>
+  <p class="counter" id="counter"></p>
+</div>
 
-  <script>
-    function goToScreen2() {
-      document.getElementById('screen1').classList.add('hidden');
-      document.getElementById('screen2').classList.remove('hidden');
-    }
+<script>
+/* =====================================================================
+   ✏️  WRITE YOUR OWN LETTERS HERE
+   ---------------------------------------------------------------------
+   Add one object per memory to the MEMORIES array below.
+     image:      photo filename placed in the same folder ("" = none yet)
+     date:       shown under the title, e.g. "March 14, 2023"
+     title:      short title for the memory
+     body:       array of strings, one per paragraph — write however you like
+     closing:    the little sign-off line before your signature
+     signature:  whatever you want signed at the bottom
+     initials:   two letters/emoji shown in the little heart seal, e.g. "A+B"
+   Add as many entries as you want — one is picked at random every time
+   the page loads, and again every time "next memory" is clicked.
+   ===================================================================== */
 
-    function askSomu() {
-      const response = document.getElementById('response');
-      const screen2 = document.getElementById('screen2');
+const MEMORIES = [
+  {
+    image: "1.jpeg", // e.g. "photo1.jpg"
+    date: "6 january",
+    title: "FIRST PIC DAY",
+    body: [
+      "aaj mei apni somu ke sath photo khichwake laya jisko mei kabse apni bandi banana chahta tha aaj mene uski sath photo li thanks for clicking the picture with me somu means a lotttt"
+      
+    ],
+    closing: "yours, raghav",
+  },
+  {
+    image: "2.jpeg",
+    date: "9 january",
+    title: "Biryani Date",
+    body: [
+      "2 din papa ne jaane nhi diya teesre din finally somu ke sath biryani khake aya \"sahi investment\" krdiya guru thnks for joding hath to me somu"
+    ],
+    closing: "with love,raghav",
+   
+  },
+  {
+    image: "3.jpeg",
+    date: "12 january",
+    title: "Sexual Assault",
+    body: [
+      "bhai ham toh unseris h naaa onlyyy friends no future sorry for love bombing you meri jaan but trust me vo saari linein tere liye hi banayi jati thi love you"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "4.jpeg",
+    date: "26 january",
+    title: "23/24",
+    body: [
+      "aur bhai kya kehri thi aaagye 23 kiss kr yayya somuuu kisssisis paneer ki sabji khaunga ye krunga v krunga vo awkrd silence meri bekar si kiss back everything is so heavenly when it is with somu man i love my somu sm sonu bhaiya ke dekhne pe bhi mujhe na chodhne ke liye thankss i love my baby so mucchchch"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "5.jpeg",
+    date: "27 january",
+    title: "terko kiss chahiye toh mud",
+    body: [
+      "mene tanish se bola tha mei momos khaunga tu momos leke jaane ke bahane meri phtos kheehda iss din hamne pehli video tere phone se bhi banayi thi and i still dont know teri ma ka naam tripta h ya tripti"
+    ],
+    closing: "with love,raghav",
+   
+  }
 
-      // Thinking state
-      screen2.style.backgroundImage = "url('thinking.jpg')";
-      response.innerText = "Somu is thinking...";
+,
+  {
+    image: "6.jpeg",
+    date: "28 january",
+    title: "secret record",
+    body: [
+      "chlooo firseee momos khakekee aateeee hhhhh yayaayay somuuu seee firsi kissi lunga iss point tk mera kiss count 3 tha ab dekho kitna bigad gya h ladka"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "7.jpeg",
+    date: "5 feburary",
+    title: "first fight",
+    body: [
+      "Hamari pehli ladai yr iske baad hi ham Kabir singh st John's wali degi pe gye they aur issi mei mene terko sorry ki jagah kissi dedi thi"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "8.jpeg",
+    date: "9 feburary",
+    title: "chocolateday",
+    body: [
+      " choclate day iss din mene apni somu ko pehli baar kuch diya aur somu ne mujhe kisisisisis didididid yayayayya mere sath toh photo Li ni h yahi thi jo thi pgl"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "9.jpeg",
+    date: "20 feburary",
+    title: "first hug",
+    body: [
+      "  first hug of my life merko ussdin tk nhi pata tha yr merse koi sahi mei pyar kr skta h yr uss din mei ghr aake bhi roya tha yr merko bhot acha laga tha Teri soft soft skin se chipak ke yr I loved life the most that day"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "10.jpeg",
+    date: "26 feburary",
+    title: "dominos",
+    body: [
+      "  first somu sonu mini date meri somu mere liye school se aayi thi hamne adha ghanta waha wait Kiya fir pizza bhi khake nhi aye iss din mei ek dam bekar kpdo mei aya tha fir bhi somu ne merse pyar kiya kya ldki h yr meri somu iss din hamne kitni der tk hug kiya tha aur kitne mini kissi kiye they kya din tha yr yayay"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "11.jpeg",
+    date: "7 march",
+    title: "mcd",
+    body: [
+      "  saurbh registration pyar toh bhaiya aisa h dono ko hi anurag pe registration nhi mila iss din mene papa se darte hue bhi terko monu se kuch toh dilaya tha fir tu kehti h pyar nhi krti meri pgl somu first mcd date btw"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "12.jpeg",
+    date: "12 march",
+    title: "lapinoz",
+    body: [
+      " march lapinoz date iss din mene terko pehli baar khulke saurbh joshi pe haste hue dekha tha aur mene pehli baar terko kuch khilaya tha v nice day"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "13.jpeg",
+    date: "23 march",
+    title: "greens and beans",
+    body: [
+      " march hamari pehli date wali date meri first kiss mera pehla cafe ka bill pehli baar rose leke ana pehli baar timelapse banane akhri baar aur hamesha ke liye apni somu ke liye gir Jana I love somu I love her jeans her white top her phone her aesthetic everything"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "14.jpeg",
+    date: "1 april",
+    title: "somusonu days",
+    body: [
+      " starting of somu sonu adventures mene terko forehead kissi ki thi tune merko bhot data tha fir ham tere piyush pe gye they aur waha mene terse bhototo baate kii thii aur usme mujhebhototo maja aya aur fir hamne bhot baate kiiii aur fir yayaayay somuuuuu"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "15.jpeg",
+    date: "10 april",
+    title: "ice cream",
+    body: [
+      " not our first ice cream date but iss din tu bhot gusse mei thi fir tune bhot pyar se bola tha ice cream fir mene terko i ce cream khilayi like awwww ice khayegi meri somu khalo somu puri aapki h I love you baby"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "16.jpeg",
+    date: "11 april",
+    title: "wow somu",
+    body: [
+      " wow momos date iss din mene pehli baar tere chashme pehne they jo tu e merko diye they hamne reel banane ka try kiya lekin aunty khadi thi piche aunty teri ma ki chut but meri somu meri somu ki no ma ki chut meri somu is js pyari pyari sabki dulhari"
+    ],
+    closing: "with love,raghav",
+   
+  },
+  {
+    image: "17.jpeg",
+    date: "16 april",
+    title: "byeeee",
+    body: [
+      "  iske bad tu mujhe chodhke shadi mei chli gyi thi 😢😢😢 yaha ham pehli baar aprl mei sonu pe gye they jaha vo uncle hamare side mei aake beth gye they lekin vo ab uncle ache h love somu and love uncle"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "18.jpeg",
+    date: "22 april",
+    title: "hiiii",
+    body: [
+      "  tu shadi se wapis aayi thi fir hamne bhototototo chumma chaati ki thi first sardar g chaap date aur tb toh mei puri plate chaap bhi khaleta tha kya din they yr tu merko pkd ke Sogyi thi aur merko bhot kissi kri thi yayaya"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "19.jpeg",
+    date: "3 may",
+    title: "bhoot bangla",
+    body: [
+      " First time touching somu first time feeling somu touched somu boobs kissed all the parking picked up somu loved somu loving somu now also somu is literally the greatest piece of art ever built literally hath se banaya hua khajana h meri somu I love you"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "20.jpeg",
+    date: "5 may",
+    title: "kabir singh",
+    body: [
+      " Tujhe nhi pata hoga lekin mei ek din pehle tanish ko bolke laya tha somu aur meri photo nikaldiyo saale fir hi chlenge ham piercing krwane itna try kiya tha achi photo ajaaye but bhaiya shkl hu aisi h meri kya kre but thnks for patience somu I love you"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "21.jpeg",
+    date: "10 may",
+    title: "mcd 2",
+    body: [
+      " exactly ek hafte baad firse mcd gye they kyuki meraaaa itnanannaan mananaan thahaha somuu ko kiss krne ka isiliye hi niche park kri thi isiliye sab kuch kiya tha js so I can kiss somu while holding her literally the best experience of my life"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "22.jpeg",
+    date: "16 may",
+    title: "womu maxxingg",
+    body: [
+      " parking jaynge somu ko kiss krenge max jaynge somu ko kiss krenge aur photos bhi lengegege yayayaya hamari pehli aesthetic mirror selfie jisme hamne unintentionally ek dusre ka hath pkda hua tha so fun and entertaining man I love you somu"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "23.jpeg",
+    date: "20 may",
+    title: "rickmurai somu",
+    body: [
+      " sexxxxxx somuu ke sath sexxxxx tanishshs ki jalannana tanishsh ki thanks bolnana firrrrr somu ke soft soft nipples suck Krna isko 2 mahine hogye h yr I miss this day sm kash YHI meri jindagi ka time loop kash mei firse somu ke upar hota yrrr u want to lick somu all over again"
+    ],
+    closing: "with love,raghav",
+   
+  }
+,
+  {
+    image: "24.jpeg",
+    date: "23 may",
+    title: "somu jackson",
+    body: [
+      "greatest somu photo I have after every other greatest photo of somu I have "
+    ],
+    closing: "with love,raghav",
+   
+  }
+];
 
-      setTimeout(() => {
-        // Final state
-        screen2.style.backgroundImage = "url('final.jpg')";
-        response.innerText = "Hmmm... mtlb tu kehra h mei independent nhi hu🙄.";
-      }, 6000);
-    }
-  </script>
+let currentIndex = -1;
 
+function pickIndex(){
+  if (MEMORIES.length <= 1) return 0;
+  let next;
+  do { next = Math.floor(Math.random() * MEMORIES.length); }
+  while (next === currentIndex);
+  return next;
+}
+
+function render(index){
+  currentIndex = index;
+  const m = MEMORIES[index];
+
+  const bg = document.getElementById('bg-layer');
+  if (m.image) {
+    bg.classList.remove('no-photo');
+    bg.style.backgroundImage = `url("${m.image}")`;
+  } else {
+    bg.classList.add('no-photo');
+    bg.style.backgroundImage = 'none';
+  }
+
+  document.getElementById('dateline').textContent = m.date;
+  document.getElementById('title').textContent = m.title;
+  document.getElementById('closing').textContent = m.closing;
+  document.getElementById('signature').textContent = m.signature;
+  document.getElementById('sealInitials').textContent = m.initials;
+
+  const bodyEl = document.getElementById('body');
+  bodyEl.innerHTML = '';
+  m.body.forEach((p, i) => {
+    const para = document.createElement('p');
+    para.textContent = p;
+    para.style.animationDelay = (0.15 + i * 0.18) + 's';
+    bodyEl.appendChild(para);
+  });
+
+  document.getElementById('counter').textContent =
+    MEMORIES.length > 1 ? `letter ${index + 1} of ${MEMORIES.length}` : '';
+
+  const wrap = document.querySelector('.letter-wrap');
+  wrap.style.animation = 'none';
+  void wrap.offsetWidth;
+  wrap.style.animation = '';
+}
+
+/* ---------- floating hearts, continuously spawned ---------- */
+const heartEmojis = ['💗','💖','💕','✨','💌','🌸'];
+function spawnFloatingHeart(){
+  const el = document.createElement('span');
+  el.className = 'heart-particle';
+  el.textContent = heartEmojis[Math.floor(Math.random()*heartEmojis.length)];
+  const startX = Math.random()*100;
+  const duration = 7 + Math.random()*6;
+  const drift = (Math.random()*80 - 40) + 'px';
+  const size = 0.9 + Math.random()*1.1;
+  el.style.left = startX + 'vw';
+  el.style.fontSize = size + 'rem';
+  el.style.setProperty('--drift', drift);
+  el.style.animationDuration = duration + 's';
+  document.getElementById('hearts-bg').appendChild(el);
+  setTimeout(() => el.remove(), duration*1000 + 200);
+}
+setInterval(spawnFloatingHeart, 900);
+for (let i=0;i<6;i++) setTimeout(spawnFloatingHeart, i*300);
+
+render(pickIndex());
+</script>
 </body>
 </html>
