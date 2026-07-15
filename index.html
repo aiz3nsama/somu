@@ -83,7 +83,7 @@ body{
 }
 #bg-layer.no-photo ~ .no-photo-hint{display:flex;}
 
-/* ---------- FLOATING HEARTS ---------- */
+/* ---------- FLOATING PARTICLES (hearts, bunnies, unicorns) ---------- */
 #hearts-bg{
   position:fixed;
   inset:0;
@@ -347,10 +347,11 @@ const MEMORIES = [
     title: "FIRST PIC DAY",
     body: [
       "aaj mei apni somu ke sath photo khichwake laya jisko mei kabse apni bandi banana chahta tha aaj mene uski sath photo li thanks for clicking the picture with me somu means a lotttt"
-      
+
     ],
     closing: "yours, raghav",
-  },
+  }
+,
   {
     image: "2.jpeg",
     date: "9 january",
@@ -651,8 +652,8 @@ function render(index){
   wrap.style.animation = '';
 }
 
-/* ---------- floating hearts, continuously spawned ---------- */
-const heartEmojis = ['💗','💖','💕','✨','💌','🌸'];
+/* ---------- floating particles: hearts, bunnies, rabbits, unicorns ---------- */
+const heartEmojis = ['💗','💖','💕','✨','💌','🌸','🐰','🐇','🦄'];
 function spawnFloatingHeart(){
   const el = document.createElement('span');
   el.className = 'heart-particle';
